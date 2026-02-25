@@ -1,0 +1,49 @@
+.kanbanBoard {
+  flex-grow: 1;
+  display: grid;
+  grid-template-rows: 70px 1fr;
+  gap: 0 0.7rem;
+  padding: 15px;
+}
+  
+.columnHeader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  border-top-right-radius: 16px;
+  border-top-left-radius: 16px;
+  color: white;
+  height: 70px;
+}
+  
+.todoHeader {
+  background-color: #3b82f6;
+}
+.inProgressHeader {
+  background-color: #facc15;
+}
+.doneHeader {
+  background-color: #10b981;
+}
+
+.statusColumn {
+  background-color: #f3f4f6;
+  border-bottom-right-radius: 16px;
+  border-bottom-left-radius: 16px;
+  padding: 10px;
+  height: calc(100vh - 200px);
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  gap: 0.5rem;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none; 
+  width: 100%;
+  box-sizing: border-box;
+}
+.statusColumn::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+}

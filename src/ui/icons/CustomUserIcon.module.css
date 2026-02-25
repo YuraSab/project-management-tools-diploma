@@ -1,0 +1,17 @@
+.iconBlock{
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    background: purple;
+    font-weight: bold;
+    text-transform: capitalize;
+    cursor: pointer;
+    z-index: 0;
+}
+
+.smallerText {
+  font-size: 16px;
+  background-color: gray;
+}

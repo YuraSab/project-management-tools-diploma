@@ -1,0 +1,21 @@
+.textBlock{
+    padding: 0 7px;
+    border-radius: 4px;
+    color: white;
+}
+
+.blue{
+    background-color: #3b82f6;
+}
+.yellow{
+    background-color: #facc15;
+}
+.green{
+    background-color: #10b981;
+}
+.red{
+    background-color: rgba(255, 0, 0, 0.844);
+}
+.gray{
+    background-color: rgba(128, 128, 128, 0.751);
+}

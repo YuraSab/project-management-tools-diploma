@@ -1,0 +1,26 @@
+.titleBlock{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 30px;
+    height: 45px;
+    box-sizing: border-box;
+    width: calc(310px - 50px);
+}
+
+.controlIcons{
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.titleBlock h1 {
+    font-weight: bold;
+    word-break: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    width: 100%;
+  }

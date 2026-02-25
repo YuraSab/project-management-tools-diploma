@@ -1,0 +1,32 @@
+.main{
+  min-height: calc(100vh - 130px);
+  margin: 15px;
+  box-sizing: border-box;
+  border-radius: 16px;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px 15px;
+}
+
+.rightPanelChild{
+  height: calc(100vh - 100px - 30px - 50px - 45px);
+  overflow-y: auto;
+  padding-top: 10px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.rightPanelChild::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  color: #1f2937;
+}

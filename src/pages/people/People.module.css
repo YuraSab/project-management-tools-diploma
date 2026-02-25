@@ -1,0 +1,17 @@
+.main{
+    padding: 40px;
+}
+
+ul{
+    display: flex;
+    flex-direction: column;
+}
+
+.element{
+    margin: 4px 0;
+    padding: 8px 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px gray solid;
+}
