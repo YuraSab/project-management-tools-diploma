@@ -1,8 +1,7 @@
 import { JSX } from "react";
-import { useAuth } from "../../layouts/authProvider/AuthProvider";
 import { Navigate } from "react-router-dom";
 import { Role } from "../../types/user";
-import { useUserAccess } from "../../layouts/authProvider/UseUserAccess";
+import { useAuthStore } from "../../store/useAuthStore";
 
 interface ProtectedRouteProps {
     element: JSX.Element,
@@ -10,12 +9,15 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ element, allowedRoles }: ProtectedRouteProps) => {
-    const { isAuthenticated } = useAuth();
-    const { role } = useUserAccess();
-    if (!isAuthenticated || !role) 
-      return <Navigate to="/login" replace />;
-    if (allowedRoles && (!allowedRoles.includes(role)))
-      return <Navigate to="/" replace />;
+    const user = useAuthStore((state) => state.user);
+    const isLoading = useAuthStore((state) => state.isLoading);
+
+    if (isLoading)
+      return <div>Loading...</div>; // todo - real spinner
+    if (!user)
+      return <Navigate to={'/login'} replace />;
+    if (allowedRoles && !allowedRoles.includes(user.role))
+        return <Navigate to={'/'} replace />
     return element;
 };
   

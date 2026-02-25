@@ -1,72 +1,65 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { register } from "../../services/loginApi";
 import React, { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthFormLayout from "../../layouts/authFormLayout/AuthFormLayout";
 import FormTextInput from "../../ui/input/FormTextInput";
 import FormPasswordInput from "../../ui/input/FormPasswordInput";
 import FormButtonSubmit from "../../ui/button/FormButtonSubmit";
+import { authService } from "../../services/authService";
 
 const Register = () => {
-    const queryClient = useQueryClient();
     const navigate = useNavigate();
-
-    const mutation = useMutation({
-        mutationFn: register,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["users"] });
-            alert("Registration is successful!");
-            navigate("/login");
-        },
-        onError: (error: any) => {
-            throw new Error(`Error during registration. Status: ${error.message}`);
-        }
-    });
 
     const [formData, setFormData] = useState({
         name: "",
-        username: "",
+        email: "",
         password: "",
         repeatedPassword: "",
     });
-    const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = event.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     }, []);
 
-    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        if ( !formData.name || !formData.username || !formData.password || !formData.repeatedPassword ) {
-            alert("Password fields are different!");
+        if ( !formData.name || !formData.email || !formData.password || !formData.repeatedPassword ) {
+            setError("Please fill all the fields.");
             return;
         }
         if ( formData.password !== formData.repeatedPassword ) {
-            alert("Passwords do not match!");
+            setError("Passwords do not match!");
             return;
         }
-        mutation.mutate({ 
-            name: formData.name, 
-            username: formData.username, 
-            password: formData.password, 
-            role: "member", 
-            reservedMembers: [] 
-        });
+        setIsLoading(true);
+        try {
+            await authService.register(formData.email, formData.password, formData.name);
+            navigate('/');
+        } catch(error) {
+            setError('Faled user register!');
+        } finally {
+            setIsLoading(false);
+        }
     }
 
+    if (isLoading)
+        return <div>Loading...</div>; // todo - real loader
     
     return (
         <AuthFormLayout handleSubmit={handleSubmit}>
             <h1 style={{fontSize: 28, fontWeight: "bold", textAlign: "center"}}>Register</h1>
             <FormTextInput name={"name"} value={formData.name} onChange={handleChange} placeholder="name" />
-            <FormTextInput name={"username"} value={formData.username} onChange={handleChange} placeholder="username" />
+            <FormTextInput name={"email"} value={formData.email} onChange={handleChange} placeholder="email" />
             <FormPasswordInput  name={"password"} value={formData.password} onChange={handleChange} required showPassword={showPassword} setShowPassword={setShowPassword} placeholder={"password"} />
             <FormPasswordInput  name={"repeatedPassword"} value={formData.repeatedPassword} onChange={handleChange} required showPassword={showPassword} setShowPassword={setShowPassword} placeholder={"password"} />
             <FormButtonSubmit text={"Register"}/>
             <p className="text-center text-gray-500 text-sm" onClick={() => navigate("/login")}>or, you already have account</p>
+            <h2 style={{color: 'red'}}>{error}</h2>
         </AuthFormLayout>
-    )
+    );
 }
 
 export default Register;

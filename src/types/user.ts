@@ -7,10 +7,10 @@ export enum UserRole {
 }
 
 export interface User {
-    id: string,
-    name: string,
-    role: Role,
+    uid: string,
+    email: string | null,
+    name: string, // Раніше було displayName
     username: string,
-    password: string,
+    role: Role,
     reservedMembers: string[],
 }

@@ -1,36 +1,38 @@
-import React, { createContext, ReactNode, useContext, useState } from "react";
-
-interface AuthContextType {
-    isAuthenticated: boolean,
-    login: (token: string) => void;
-    logout: () => void;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import React, { ReactNode, useEffect } from "react";
+import { useAuthStore } from "../../store/useAuthStore";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../firebase";
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [isAuthenticated, setIdAuthenticated] = useState<boolean>(!!localStorage.getItem("token"));
+    const setUser = useAuthStore((state) => state.setUser);
+    const isLoading = useAuthStore((state) => state.isLoading);
+    const setIsLoading = useAuthStore((state) => state.setLoading);
+    const setLogoutUser = useAuthStore((state) => state.setLogoutUser);
 
-    const login = (token: string) => {
-        localStorage.setItem("token", token);
-        setIdAuthenticated(true);
-    }
-    const logout = () => {
-        localStorage.removeItem("token");
-        setIdAuthenticated(false);
-    }
-    const value = {
-        isAuthenticated,
-        login,
-        logout,
-    }
-    
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    // синхонізація даних в firebase та zustand
+    useEffect(() => {
+        const unscubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+            // user that is stored in firebase cache
+            if (firebaseUser) {
+                setUser({
+                    uid: firebaseUser.uid,
+                    email: firebaseUser.email,
+                    name: firebaseUser.displayName || 'User',
+                    username: firebaseUser.email?.split('@')[0] || "user",
+                    role: 'admin', // todo - temporary admin
+                    reservedMembers: [], // todo - temporary empty array
+                });
+            } else {
+                setLogoutUser();
+            }
+            setIsLoading(false);
+        });
+        return () => unscubscribe();
+    }, [setUser, setIsLoading]);
+
+
+    if (isLoading)
+        return <div>Loading...</div>; // todo - add real loader
+
+    return <>{children}</>;
 }
-
-export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context)
-        throw new Error('useAuth must be used within an AuthProvider');
-    return context;
-};
