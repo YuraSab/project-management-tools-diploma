@@ -1,38 +1,42 @@
-import React, { ReactNode, useEffect } from "react";
-import { useAuthStore } from "../../store/useAuthStore";
+import React, {ReactNode, useEffect} from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase";
+import { useAuthStore } from "../../store/authStore";
+import {useShallow} from "zustand/react/shallow";
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const setUser = useAuthStore((state) => state.setUser);
-    const isLoading = useAuthStore((state) => state.isLoading);
-    const setIsLoading = useAuthStore((state) => state.setLoading);
-    const setLogoutUser = useAuthStore((state) => state.setLogoutUser);
+interface AuthProviderProps {
+    children: ReactNode
+}
 
-    // синхонізація даних в firebase та zustand
-    useEffect(() => {
-        const unscubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-            // user that is stored in firebase cache
+export const AuthProvider = ({ children }: AuthProviderProps) => {
+    const {
+        setLogin, setLogout,
+        isUserLoading, setIsUserLoading
+    } = useAuthStore(useShallow((state) => ({
+        setLogin: state.setLogin, setLogout: state.setLogout,
+        isUserLoading: state.isUserLoading, setIsUserLoading: state.setIsUserLoading
+    })));
+
+    useEffect(() => {    // firebase & zustand data sync
+        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
             if (firebaseUser) {
-                setUser({
+                setLogin({
                     uid: firebaseUser.uid,
                     email: firebaseUser.email,
-                    name: firebaseUser.displayName || 'User',
-                    username: firebaseUser.email?.split('@')[0] || "user",
-                    role: 'admin', // todo - temporary admin
-                    reservedMembers: [], // todo - temporary empty array
+                    displayName: firebaseUser.displayName ||'User',
                 });
-            } else {
-                setLogoutUser();
-            }
-            setIsLoading(false);
+            } else
+                setLogout();
+            setIsUserLoading(false);
         });
-        return () => unscubscribe();
-    }, [setUser, setIsLoading]);
+        return () => unsubscribe();
+    }, [setLogin, setLogout, setIsUserLoading]);
 
 
-    if (isLoading)
+    if (isUserLoading)
         return <div>Loading...</div>; // todo - add real loader
 
-    return <>{children}</>;
-}
+    return (
+        <> {children} </>
+    );
+};

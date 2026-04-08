@@ -1,54 +1,37 @@
-import { NavLink } from "react-router-dom";
 import styles from "./Projects.module.css";
-import { useProjectControlStore } from "../../store/projectControlStore";
-import { Project } from "../../types/project";
 import { useUserProjects } from "../../hooks/users/useUserProjects";
-import { useUserStore } from "../../store/userStore";
-import { useUserThemeStore } from "../../store/userThemeStore";
+import {useAuthStore} from "../../store/authStore.ts";
+import ProjectCard from "../../components/projectCard/ProjectCard.tsx";
+import clsx from "clsx";
+import ProjectsSkeleton from "../../components/projectCard/ProjectsSkeleton.tsx";
+import FAB from "../../ui/FAB/FAB.tsx";
+import {Plus} from "lucide-react";
+import Error from "../../components/error/Error.tsx";
+import {useProfileStore} from "../../store/profileStore.ts";
+
+const MODES = {
+    white: styles.isLightMode,
+    black: styles.isDarkMode
+} as const;
 
 const Projects = () => {
-    const currentUser = useUserStore((state) => state.currentUser);
-    const { data: projects, isLoading, isError } = useUserProjects(currentUser?.id || "");
+    const user = useAuthStore((state) => state.user)
+    const { data: projects, isPending, isError } = useUserProjects(user?.uid ?? "");
+    const theme = useProfileStore((state) => state.profile.theme);
 
-    const selectedProject = useProjectControlStore((state) => state.selectedProject);
-    const clearFiltersAndSorts = useProjectControlStore((state) => state.clearFiltersAndSorts);
-    const setSelectedProject = useProjectControlStore((state) => state.setSelectedProject);
-    const backgroundMode = useUserThemeStore((state) => state.backgroundMode);
-    const highlightMode = useUserThemeStore((state) => state.highlightMode);
+    if (isPending) return <ProjectsSkeleton/>;
 
-    const handleChoseProject = (chosenProject: Project) => {
-        if (chosenProject.id !== selectedProject?.id)
-            clearFiltersAndSorts();
-        setSelectedProject(chosenProject);
-    }
-
-    const themeClassMap = {
-        purple: styles.purpleBlock,
-        green: styles.greenBlock,
-        blue: styles.blueBlock,
-        orange: styles.orangeBlock,
-    };
-    
-    if (isLoading) return <div>Loading...</div>;
-    if (isError) return <div>Error: Something went wrong while fetching the projects!{isError}</div>;
-    if (projects?.length === 0) return <div>No projects found.</div>;
-    
-    return(
-        <div className={styles.main} style={{backgroundColor: backgroundMode === "black" ? "black" : "#f9f9fb", color: "black"}}>
+    return (
+        <div className={clsx( styles.main, MODES[theme] )}>
             {
-                projects?.map((project) => 
-                    <NavLink to={`/projects/${project.id}`} key={project.id} onClick={() => handleChoseProject(project)}>
-                        <div className={`${styles.element} ${highlightMode && themeClassMap[highlightMode]}`}>
-                            <div>
-                                <h3>{project.title}</h3>
-                                <p>{project.description}</p>
-                            </div>
-                        </div>
-                    </NavLink>
-                )
+                projects && projects.length > 0
+                    ? projects.map((p) => <ProjectCard project={p} key={p.id}/>)
+                    : <Error type={'not_found'}/>
             }
+            { isError && <Error type={'server_crash'}/> }
+            <FAB><Plus size={36} color={theme}/></FAB>
         </div>
-    )
-}
+    );
+};
 
 export default Projects;

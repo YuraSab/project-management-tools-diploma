@@ -1,0 +1,50 @@
+.element{
+    border: var(--border-default);
+    border-radius: 12px;
+    padding: 16px;
+    background-color: var(--bg-card);
+    box-shadow: var(--container-box-shadow);
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.element h3{
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-text-main);
+    margin-bottom: 4px;
+}
+
+.element p{
+    font-size: 14px;
+    color: var(--color-text-muted);
+}
+
+.settingIconWrapper {
+    display: inline-block;
+}
+
+.settingIconWrapper:hover .settingsIcon {
+    color: purple;
+}
+
+.settingsIcon {
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.purpleBlock:hover{
+    background-color: var(--purple-hover);
+}
+.greenBlock:hover {
+    background-color: var(--green-hover);
+}
+.blueBlock:hover {
+    background-color: var(--blue-hover);
+}
+.orangeBlock:hover {
+    background-color: var(--orange-hover);
+}

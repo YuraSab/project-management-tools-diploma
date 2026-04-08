@@ -1,67 +1,45 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useUserStore } from "../../store/userStore";
-import { useUserThemeStore } from "../../store/userThemeStore";
-import { BackgroundModeType, IconColorType } from "../../types/userTheme";
 import CustomColorIcon from "../../ui/icons/CustomColorIcon";
 import styles from "./Personalisation.module.css";
-import { updateOrCreateUserTheme } from "../../services/userThemeApi";
 import CustomButton from "../../ui/button/CustomButton";
+import {useProfileStore} from "../../store/profileStore.ts";
+import {ColorPalette, HighlightColorSet, IconColorSet, Theme, ThemeSet, UserProfile} from "../../types/user.ts";
+import {useUpdateUser} from "../../hooks/users/useUpdateUser.ts";
+import Title from "../../ui/title/Title.tsx";
 
 const Personalisation = () => {
-    const currentUser = useUserStore((state) => state.currentUser);
-    const iconColor = useUserThemeStore((state) => state.iconColor);
-    const setIconColor = useUserThemeStore((state) => state.setIconColor);
-    const backgroundMode = useUserThemeStore((state) => state.backgroundMode);
-    const setBackgroundMode = useUserThemeStore((state) => state.setBackgroundMode);
-    const highlightMode = useUserThemeStore((state) => state.highlightMode);
-    const setHighlightMode = useUserThemeStore((state) => state.setHighlightMode);
+    const { uid, theme, iconColor, highlightColor } = useProfileStore((state) => state.profile);
+    const editProfile = useProfileStore((state) => state.editProfile);
+    const { mutate: updateProfile } = useUpdateUser(uid);
 
-    const colorSet: IconColorType[] = ["purple", "green", "orange", "blue"];
-    const backgrounColorSet: BackgroundModeType[] = ["white", "black"];
+    const handleUpdateTheme = () => {
+        if ( !uid ) return;
+        updateProfile({
+            uid,
+            theme, iconColor, highlightColor,
+        });
+    };
 
-    const queryClient = useQueryClient();
-    const editUserThemeMutation = useMutation({
-        mutationFn: updateOrCreateUserTheme,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["userTheme"] });
-        }
-    });
-
-    const handleUpdateTheme = async () => {
-        if ( !currentUser ) return;
-        const data = {
-            id: currentUser.id,
-            userId: currentUser.id,
-            backgroundMode,
-            highlightMode,
-            iconColor,
-        };
-        if ( data )
-            editUserThemeMutation.mutate(data);
-    }
-
-    if ( !currentUser ) return <h1>No user`s data!</h1>
+    const handleChangeColor = (field: keyof UserProfile, color: ColorPalette) => {
+        editProfile({ field: color });
+    };
 
     return(
-        <div className={`${styles.main} ${backgroundMode === "black" ? styles.dark : styles.light}`}>
-            <label>Your icon color
+        <div className={`${styles.main} ${theme === Theme.Black ? styles.dark : styles.light}`}>
+            <Title text={'Your icon color'}/>
             <div className={styles.palleteBlock}>
-                { colorSet.map((color) => <CustomColorIcon key={color} backgroundColor={color} onClick={setIconColor} currentColor={iconColor}/> ) }
+                { IconColorSet.map((color) => <CustomColorIcon key={color} backgroundColor={theme} field={'iconColor'} onClick={handleChangeColor} currentColor={iconColor}/> ) }
             </div>
-            </label>
-            <label>Highlight color
+            <Title text={'Highlight color'}/>
             <div className={styles.palleteBlock}>
-                { colorSet.map((color) => <CustomColorIcon key={color} backgroundColor={color} onClick={setHighlightMode} currentColor={highlightMode}/> ) }
+                { HighlightColorSet.map((color) => <CustomColorIcon key={color} backgroundColor={theme} field={'highlightColor'} onClick={handleChangeColor} currentColor={highlightColor}/> ) }
             </div>
-            </label>
-            <label>Theme color
+            <Title text={'Theme color'}/>
             <div className={styles.palleteBlock}>
-                { backgrounColorSet.map((color) => <CustomColorIcon key={color} backgroundColor={color} onClick={setBackgroundMode} currentColor={backgroundMode}/> ) }
+                { ThemeSet.map((color) => <CustomColorIcon key={color} backgroundColor={theme} field={'theme'} onClick={handleChangeColor} currentColor={theme}/> ) }
             </div>
-            </label>
             <CustomButton text={"Save changes"} onClick={handleUpdateTheme} customStyles={{width: 200}}/>
         </div>
-    )
-}
+    );
+};
 
 export default Personalisation;

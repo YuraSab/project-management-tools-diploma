@@ -1,134 +1,151 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 import styles from "./TaskEdit.module.css";
-import { useProjectControlStore } from "../../../store/projectControlStore";
-import { Task, TaskPriority } from "../../../types/task";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteTask, updateTask } from "../../../services/taskApi";
+import {useProjectControlStore} from "../../../store/projectControlStore";
+import {Task, TaskPriority, TaskStatus} from "../../../types/task";
 import CustomForm from "../../../ui/form/CustomForm";
 import RightPanelHeader from "../../rightPanel/rightPanelHeader/RightPanelHeader";
 import FormTextInput from "../../../ui/input/FormTextInput";
 import FormTextarea from "../../../ui/textArea/FormTextarea";
-import AsignMembers from "../../asignMembers/AsignMembers";
+import AssignMembers from "../../asignMembers/AssignMembers";
 import FormSelect from "../../../ui/select/FormSelect";
 import FormDateInput from "../../../ui/input/FormDateInput";
 import FormButtonSubmit from "../../../ui/button/FormButtonSubmit";
 import CustomButton from "../../../ui/button/CustomButton";
-import { useUsersThemes } from "../../../hooks/usersThemes/useUserThemes";
 import AddMember from "../../../modals/AddMember/AddMember";
-import { useReservedUsers } from "../../../hooks/users/useReservedUsers";
-import { User } from "../../../types/user";
-import { useParams } from "react-router-dom";
-import { useProject } from "../../../hooks/project/useProject";
-import { useUserThemeStore } from "../../../store/userThemeStore";
+import {UserProfile} from "../../../types/user";
+import {useParams} from "react-router-dom";
+import {useProject} from "../../../hooks/project/useProject";
+import Title from "../../../ui/title/Title";
+import {useProjectUsers} from "../../../hooks/project/useProjectUsers.ts";
+import {useUpdateTask} from "../../../hooks/task/useUpdateTask.ts";
+import {useDeleteTask} from "../../../hooks/task/useDeleteTask.ts";
+import {formatDateForInput} from "../../../utils/dateFormat.ts";
 
-const TaskEdit = React.memo(() => {
+type FormData = Omit<Task, "id" | "projectId" | "assignedMembers" | 'startDate' | 'endDate'> & { startDate: string, endDate: string };
+const getInitialFormData = (task: Task | null): FormData => ({
+    title: task?.title ?? '',
+    description: task?.description ?? '',
+    status: task?.status ?? 'todo',
+    startDate: formatDateForInput(task?.startDate) ?? '',
+    endDate: formatDateForInput(task?.endDate) ?? '',
+    priority: task?.priority ?? 'none',
+});
+
+const TaskEdit = () => {
     const { projectId } = useParams();
     
     const selectedTask = useProjectControlStore((state) => state.selectedTask);
     const setIsRightPanelActive = useProjectControlStore((state) => state.setIsRightPanelActive);
     const setIsEditTaskActive = useProjectControlStore((state) => state.setIsEditTaskActive);
     const clearSelectedTask = useProjectControlStore((state) => state.clearSelectedTask);
-    const backgroundMode = useUserThemeStore((state) => state.backgroundMode);
-    
+
     const { data: project } = useProject(projectId || "");
-    const { data: initiallyAsignedMembers } = useReservedUsers(selectedTask?.assignedMembers || []);
-    const { data: usersThemes } = useUsersThemes(selectedTask?.assignedMembers || []);
-    const { data: projectAsignedMembers } = useReservedUsers(project?.assignedMembers || []);
+    const { data: projectMembers } = useProjectUsers(project?.assignedMembers || []);
+    const { data: taskAssignedMembers } = useProjectUsers(selectedTask?.assignedMembers || []);
+    const { mutate: updateTask, isPending: isPendingUpdate } = useUpdateTask();
+    const { mutate: deleteTask, isPending: isPendingDelete } = useDeleteTask();
 
-    const [formData, setFormData] = useState<Omit<Task, "id" | "projectId" | "assignedMembers">>({
-        title: selectedTask?.title || "",
-        description: selectedTask?.description || "",
-        status: selectedTask?.status || "todo",
-        startDate: selectedTask?.startDate || "",
-        endDate: selectedTask?.endDate || "", 
-        priority: selectedTask?.priority || "none",
-    });
+    const [formData, setFormData] = useState<FormData>(getInitialFormData(selectedTask));
+    const [localAssignedMembersMap, setLocalAssignedMembersMap] = useState<Map<string, UserProfile>>(new Map());
     const [addMembersActive, setAddMembersActive] = useState<boolean>(false);
-    const [assignedMembers, setAssignedMembers] = useState<User[]>(initiallyAsignedMembers || []);
-    
-    const queryClient = useQueryClient();
-    const editTaskMutation = useMutation({
-        mutationFn: updateTask,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["tasks"] });
-        }
-    });
-    const deleteTaskMutation = useMutation({
-        mutationFn: deleteTask,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["tasks"] });
-        }
-    });
 
-    const handleAsignUserClick = useCallback((chosenUser: User) => {
-            setAssignedMembers((prev) => {
-                const isAdded = prev.find((u) => u.id === chosenUser.id);
-                return isAdded
-                ? prev.filter((u) => u.id !== chosenUser.id)
-                : [...prev, chosenUser];
-            })
-    }, []);
+    const projectMembersMap: Map<string, UserProfile> = useMemo(() => new Map(
+        projectMembers
+            ? projectMembers.map(m => [m.uid, m])
+            : []
+    ), [projectMembers]);
+
+    const localAssignedMembers = useMemo(() => (
+        [...localAssignedMembersMap.values()]
+    ), [localAssignedMembersMap]);
+
+    const handleAssignUser = useCallback((memberId: string) => {
+        setLocalAssignedMembersMap((prev) => {
+            const newMap = new Map(prev);
+            if (newMap.has(memberId))
+                newMap.delete(memberId)
+            else {
+                const newMember = projectMembersMap.get(memberId);
+                if (newMember)
+                    newMap.set(memberId, newMember);
+            }
+            return newMap;
+        });
+    }, [projectMembersMap]);
 
     const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = event.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     }, []);
 
-    const handleSubmitEdit = (event: React.FormEvent) => {
-        event.preventDefault();
-        if (!selectedTask?.id) 
+    const handleUpdate = useCallback(() => {
+        if (!selectedTask?.id)
             return;
-        if ( !formData.title || !formData.description )
-            alert("Please fill all the requered fields!");
-        editTaskMutation.mutate({
+        if (!formData.title.trim() || !formData.description.trim())
+            return alert("Please fill all the required fields!");
+        updateTask({
+            ...formData,
             id: selectedTask.id,
             projectId: selectedTask.projectId,
-            assignedMembers: assignedMembers.map((am) => am.id),
-            ...formData,
+            assignedMembers: [...localAssignedMembersMap.keys()],
+            startDate: formData.startDate ? new Date(formData.startDate) : null,
+            endDate: formData.endDate ? new Date(formData.endDate) : null,
         });
-    };
+    }, [formData, localAssignedMembersMap, selectedTask, updateTask]);
 
-    const handleDelete = async () => {
-        if (window.confirm("Ви впевнені, що хочете видалити дане завдання?")) {
-            deleteTaskMutation.mutate(selectedTask?.id || "");
+    const handleDelete = useCallback(() => {
+        if (window.confirm("Are you sure you wanna delete this task?")) {
+            deleteTask(selectedTask?.id || "");
             clearSelectedTask();
         }
-    }
+    }, [selectedTask, deleteTask, clearSelectedTask]);
 
     useEffect(() => {
-        if (initiallyAsignedMembers)
-            setAssignedMembers(initiallyAsignedMembers);
-    }, [initiallyAsignedMembers]);
+        if(selectedTask && taskAssignedMembers) {
+            setFormData(getInitialFormData(selectedTask));
+            setLocalAssignedMembersMap(
+                new Map(taskAssignedMembers.map(m => [m.uid, m]))
+            );
+        } // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedTask?.id, taskAssignedMembers]);
 
     return(
-        <CustomForm onSubmit={handleSubmitEdit} customStyles={{ margin: 15, minHeight: "calc(100vh - 130px)", gap: 0, backgroundColor: backgroundMode }}>
+        <CustomForm onSubmit={handleUpdate} style={{margin: 15, height: "calc(100vh - 130px)"}} disabled={isPendingUpdate || isPendingDelete}>
             <RightPanelHeader taskTitle={selectedTask?.title || ""} setIsEditTaskActive={setIsEditTaskActive} setIsRightPanelActive={setIsRightPanelActive}/>
             <div className={styles.rightPanelChildEdit}>
-                <label>Title
-                    <FormTextInput name={"title"} value={formData.title} onChange={handleChange} required/>
-                </label>
-                <label>Description:
-                    <FormTextarea name={"description"} value={formData.description} onChange={handleChange} />                
-                </label>
-                <AsignMembers usersThemes={usersThemes || []} users={assignedMembers || []} setAddMembersActive={setAddMembersActive} maxIcons={1}/>
-                <label>Status:
-                    <FormSelect name={"status"} value={formData.status} onChange={handleChange} options={["todo", "in_progress", "done"]}/>
-                </label>
-                <label>From:
-                    <FormDateInput name={"startDate"} value={formData.startDate || ""} onChange={handleChange} />
-                </label>
-                <label>To:
-                    <FormDateInput name={"endDate"} value={formData.endDate || ""} onChange={handleChange} />
-                </label>
-                <label>Priority
-                    <FormSelect<TaskPriority> name={"priority"} value={formData.priority} onChange={handleChange} options={["low", "medium", "high", "none"]}/>
-                </label>
-                <FormButtonSubmit text={"Save chenges"} customStyles={{height: 40}}/>
-                <CustomButton text={"Delete task"} onClick={() => handleDelete()} customStyles={{backgroundColor: "#D10000", height: 40}}/> 
-                { addMembersActive && <AddMember usersThemes={usersThemes || []} initiallyAssignedMembers={projectAsignedMembers} exitAction={() => setAddMembersActive(false)} selectedUsers={assignedMembers} handlerFilterUser={handleAsignUserClick}/> }
+                <Title text={'Title'}/>
+                <FormTextInput name={"title"} value={formData.title} onChange={handleChange} required/>
+                <Title text={'Description:'}/>
+                <FormTextarea name={"description"} value={formData.description} onChange={handleChange} />
+                <Title text={'Members:'}/>
+                <AssignMembers
+                    assignedMembers={localAssignedMembers}
+                    setAddMembersActive={setAddMembersActive}
+                    maxIcons={2} iconSize={28}
+                />
+                <Title text={'Status:'}/>
+                <FormSelect<TaskStatus> name={"status"} value={formData.status} onChange={handleChange} options={["todo", "in_progress", "done"]}/>
+                <Title text={'From:'}/>
+                <FormDateInput name={"startDate"} value={formData.startDate} onChange={handleChange} />
+                <Title text={'To:'}/>
+                <FormDateInput name={"endDate"} value={formData.endDate} onChange={handleChange} />
+                <Title text={'Priority:'}/>
+                <FormSelect<TaskPriority> name={"priority"} value={formData.priority} onChange={handleChange} options={["low", "medium", "high", "none"]}/>
+                <div className={styles.buttonBlock}>
+                    <FormButtonSubmit text={"Save changes"}/>
+                    <CustomButton text={"Delete task"} onClick={() => handleDelete()} customStyles={{backgroundColor: "#D10000"}}/>
+                </div>
             </div>
+            { addMembersActive &&
+                <AddMember
+                    membersMap={projectMembersMap}
+                    selectedMembersIds={[...localAssignedMembersMap.keys()]}
+                    filterMemberAction={handleAssignUser}
+                    exitAction={() => setAddMembersActive(false)}
+                />
+            }
         </CustomForm>
     )
-});
+};
 
-export default TaskEdit;
+export default React.memo(TaskEdit);

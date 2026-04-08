@@ -1,17 +1,15 @@
-import { User } from "../../types/user";
-import { UserTheme } from "../../types/userTheme";
+import {UserProfile} from "../../types/user";
 import CustomUserIcon from "../../ui/icons/CustomUserIcon";
 import styles from "./UserIconCollection.module.css";
 
 interface UserIconCollectionProps {
-    users: User[],
-    usersThemes?: UserTheme[],
+    users: UserProfile[],
     size?: number,
     fontSize?: number,
     maxIcons?: number,
 }
 
-const UserIconCollection = ({ users, size=34, maxIcons=4, fontSize, usersThemes }: UserIconCollectionProps) => {
+const UserIconCollection = ({ users, size = 34, maxIcons = 4, fontSize }: UserIconCollectionProps) => {
     const visibleUsers = users.slice(0, maxIcons);
     const hiddenUsers = (users?.length || 0) - maxIcons;
     return(
@@ -23,7 +21,7 @@ const UserIconCollection = ({ users, size=34, maxIcons=4, fontSize, usersThemes 
                         : <CustomUserIcon title={"9+"} totaly size={size} fontSize={fontSize}/>
                 )
             }
-            { visibleUsers?.map((user) => <CustomUserIcon backgroundColor={usersThemes?.find((ut) => ut.userId === user.id)?.iconColor} title={user.name} size={size} key={user.id}  fontSize={fontSize}/>) }
+            { visibleUsers?.map((u) => <CustomUserIcon backgroundColor={u.iconColor} title={u.displayName} size={size} key={u.uid}  fontSize={fontSize}/>) }
         </div>
     )
 }

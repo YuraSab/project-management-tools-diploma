@@ -1,16 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { Task } from "../../types/task";
+import {getTasks} from "../../services/taskService.ts";
 
-const fetchTasks = async (): Promise<Task[]> => {
-    const response = await fetch("http://localhost:3001/tasks");
-    if ( !response.ok )
-        throw new Error(`HTTP Error during fetching tasks. Status: ${response.status}`);
-    return await response.json();
-}
 
-export const useTasks = () => {
+export const useTasks = (projectId: string, options?: { enabled?: boolean }) => {
     return useQuery({ 
-        queryKey: ["tasks"], 
-        queryFn: fetchTasks 
+        queryKey: ["tasks", projectId],
+        queryFn: () => getTasks(projectId),
+        enabled: !!projectId && (options?.enabled ?? true), // не робимо запит, якщо projectId порожній
     });
 }

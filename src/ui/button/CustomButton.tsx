@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./FormButtonSubmit.module.css";
-import { useUserThemeStore } from "../../store/userThemeStore";
+import {useProfileStore} from "../../store/profileStore.ts";
 
 interface CustomButtonProps {
     text: string,
@@ -9,12 +9,12 @@ interface CustomButtonProps {
 }
 
 const CustomButton = ({ text, onClick, customStyles }: CustomButtonProps) => {
-    const highlightMode = useUserThemeStore((state) => state.highlightMode);
+    const highlightColor = useProfileStore((state) => state.profile.highlightColor);
     return <button
         onClick={onClick}
         className={styles.customSubmitButton} 
         style={{
-            backgroundColor: highlightMode,
+            backgroundColor: highlightColor,
             ...customStyles
         }}
     >

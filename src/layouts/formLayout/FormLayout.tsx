@@ -1,17 +1,18 @@
 import { ReactNode } from "react"
 import styles from "./FormLayout.module.css";
-import { useUserThemeStore } from "../../store/userThemeStore";
+import {useProfileStore} from "../../store/profileStore.ts";
 
 interface FormLayoutProps {
     children: ReactNode,
 }
 
 const FormLayout = ({ children }: FormLayoutProps) => {
-    const backgroundMode = useUserThemeStore((state) => state.backgroundMode);
+    const theme = useProfileStore((state) => state.profile);
+
     return <div 
         className={styles.formLayout}  
         style={{
-            backgroundColor: backgroundMode === "black" ? "black" : "#f9f9fb", 
+            backgroundColor: theme === "black" ? "black" : "#f9f9fb",
             color: "black",
         }}
     >

@@ -1,7 +1,7 @@
 .customForm {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    /*gap: 16px;*/
     max-width: 500px;
     margin: 0 auto;
     padding: 24px;
@@ -9,11 +9,19 @@
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
-.customForm label {
-    display: flex;
-    flex-direction: column;
-    font-weight: 500;
+
+.customForm fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+    min-width: 0; /* Важливо для флекс-контейнерів */
 }
+
+/*.customForm label {*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    font-weight: 500;*/
+/*}*/
 
 .light{
     background-color: white;

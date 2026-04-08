@@ -1,6 +1,7 @@
-import { NavLink, NavLinkProps } from "react-router-dom"
-import { useUserThemeStore } from "../../store/userThemeStore";
+import {NavLink, NavLinkProps} from "react-router-dom"
 import React from "react";
+import {useProfileStore} from "../../store/profileStore.ts";
+import {Theme} from "../../types/user.ts";
 
 interface CustomNavLinkProps extends NavLinkProps  {
     className?: string,
@@ -8,12 +9,11 @@ interface CustomNavLinkProps extends NavLinkProps  {
 }
 
 const CustomNavLink = ({ className = "", customStyles = {}, ...navLinkProps }: CustomNavLinkProps) => {
-    const highlightMode = useUserThemeStore((state) => state.highlightMode);
-    const backgroundMode = useUserThemeStore((state) => state.backgroundMode);
+    const profile = useProfileStore((state) => state.profile);
     const linkColorStyle = ({isActive}: {isActive: boolean}) => ({
         color: isActive 
-        ? highlightMode 
-        : backgroundMode === "black" ? "white" : "black",
+            ? profile.highlightColor
+            : profile.theme === Theme.Black ? Theme.Black : Theme.White,
         ...customStyles,
     });
 
