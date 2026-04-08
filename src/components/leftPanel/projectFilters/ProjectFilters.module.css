@@ -1,0 +1,10 @@
+.filterSortPanel{
+    display: flex;
+    flex-direction: column;
+}
+
+.checkboxBlock {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+}

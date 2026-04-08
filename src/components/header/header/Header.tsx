@@ -1,29 +1,37 @@
+import HeaderModalAccount from "../headerModalAccout/HeaderModalAccout";
 import styles from "./Header.module.css";
-import HeaderModalAccout from "../headerModalAccout/HeaderModalAccout";
-import { useUserStore } from "../../../store/userStore";
 import CustomUserIcon from "../../../ui/icons/CustomUserIcon";
-import { useUserThemeStore } from "../../../store/userThemeStore";
 import CustomNavLink from "../../../ui/link/CustomNavLink";
+import {useProfileStore} from "../../../store/profileStore.ts";
+import {Role} from "../../../types/user.ts";
+import {useHeaderStore} from "../../../store/headerStore.ts";
 
 const Header = () => {
-    const currentUser = useUserStore((state) => state.currentUser);
-    const headerModalActive = useUserStore((state) => state.headerModalActive);
-    const setHeaderModalActive = useUserStore((state) => state.setHeaderModalActive);
-    const iconColor = useUserThemeStore((state) => state.iconColor);
-    const backgroundMode = useUserThemeStore((state) => state.backgroundMode);
-    return(
-        <div className={styles.main} style={{backgroundColor: backgroundMode}}>
+    const profile = useProfileStore((state) => state.profile);
+    const isHeaderModalOpened = useHeaderStore((state) => state.isHeaderModalOpened);
+    const setIsHeaderModalToggle = useHeaderStore((state) => state.setIsHeaderModalToggle);
+
+    return (
+        <header
+            className={styles.main}
+            style={{ borderColor: profile.highlightColor, backgroundColor: profile.theme }}
+        >
             <nav>
                 <CustomNavLink to="/projects">Projects</CustomNavLink>
                 <CustomNavLink to="/people">People</CustomNavLink>
-                { (currentUser?.role === "admin" || currentUser?.role === "manager") &&
-                <CustomNavLink to="/create">Create</CustomNavLink>
-                }
+                {(profile.role !== Role.Admin || profile.role === Role.Manager) && (
+                    <CustomNavLink to="/create">Create</CustomNavLink>
+                )}
             </nav>
-            <CustomUserIcon title={currentUser ? currentUser.name : "User"} size={36} onClick={() => setHeaderModalActive(!headerModalActive)} backgroundColor={iconColor} />
-            { headerModalActive && <HeaderModalAccout/> }
-        </div>
-    )
-}
+            <CustomUserIcon
+                title={profile ? profile.displayName : "User"}
+                onClick={setIsHeaderModalToggle}
+                backgroundColor={profile.iconColor}
+                size={36}
+            />
+            {isHeaderModalOpened && <HeaderModalAccount/>}
+        </header>
+    );
+};
 
 export default Header;

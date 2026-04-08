@@ -1,0 +1,32 @@
+import React, {useEffect} from 'react';
+import {useUser} from "../../hooks/users/useUser.ts";
+import {useAuthStore} from "../../store/authStore.ts";
+import {useProfileStore} from "../../store/profileStore.ts";
+
+interface ProfileProviderProps {
+    children: React.ReactNode,
+}
+const ProfileProvider = ({ children }: ProfileProviderProps) => {
+    const user = useAuthStore((state) => state.user);
+    const setProfile = useProfileStore((state) => state.setProfile);
+
+    const { data: fetchedProfile, isSuccess, isLoading } = useUser(user?.uid || '', {
+        enabled: !!user?.uid
+    });
+
+    useEffect(() => {
+        if (!user) {
+            setProfile(null);
+            return;
+        }
+        if (isSuccess && fetchedProfile)
+            setProfile(fetchedProfile);
+    }, [fetchedProfile, user, isSuccess, setProfile]);
+
+    if (user && isLoading)
+        return <div>Loading profile...</div>; // todo - handle this with <GlobalSplashScreen/>
+
+    return <> {children} </>;
+};
+
+export default ProfileProvider;

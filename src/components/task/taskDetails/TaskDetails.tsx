@@ -1,43 +1,59 @@
 
-import { useTaskUsers } from "../../../hooks/task/useTaskUsers";
-import { useUsersThemes } from "../../../hooks/usersThemes/useUserThemes";
 import { useProjectControlStore } from "../../../store/projectControlStore";
-import { useUserThemeStore } from "../../../store/userThemeStore";
 import StatusText from "../../../ui/statusText/StatusText";
-import RightPanelHeader from "../../rightPanel/rightPanelHeader/RightPanelHeader";
-import UserIconCollection from "../../usersIconsCollection/UsersIconsCollection";
 import styles from "./TaskDetails.module.css";
 
-import React, { useCallback } from "react";
+import React, {useCallback, useMemo} from "react";
+import {useProfileStore} from "../../../store/profileStore.ts";
+import RightPanelHeader from "../../rightPanel/rightPanelHeader/RightPanelHeader.tsx";
+import {formatDateForInput} from '../../../utils/dateFormat.ts';
+import UserIconCollection from "../../usersIconsCollection/UsersIconsCollection.tsx";
+import {useTaskUsers} from "../../../hooks/task/useTaskUsers.ts";
+import {useProjectUsers} from "../../../hooks/project/useProjectUsers.ts";
+import Title from "../../../ui/title/Title.tsx";
 
-const TaskDetails = React.memo(() => {
+const TaskDetails = () => {
     const selectedTask = useProjectControlStore((state) => state.selectedTask);
     const setIsRightPanelActive = useProjectControlStore((state) => state.setIsRightPanelActive);
     const setIsEditTaskActive = useProjectControlStore((state) => state.setIsEditTaskActive);
     const setIsAddTaskActive = useProjectControlStore((state) => state.setIsAddTaskActive);
-    const backgroundMode = useUserThemeStore((state) => state.backgroundMode);
-    
-    const { data: asignedTaskUsers } = useTaskUsers(selectedTask?.assignedMembers || []);
-    const { data: usersThemes } = useUsersThemes(selectedTask?.assignedMembers || []);
+    // const backgroundMode = useUserThemeStore((state) => state.backgroundMode);
+    const theme = useProfileStore((state) => state.profile.theme)
+    // const { data: assignedTaskUsers } = useTaskUsers(selectedTask?.assignedMembers || []);
+    // const { data: usersThemes } = useUsersThemes(selectedTask?.assignedMembers || []);
 
-    const hanldleEditOpen = useCallback(() => {
+    const { data: assignedUsers } = useProjectUsers(selectedTask?.assignedMembers || []);
+
+    const handleEditOpen = useCallback(() => {
         setIsAddTaskActive(false);
         setIsEditTaskActive(true);
     }, [setIsAddTaskActive, setIsEditTaskActive]);
 
     if (!selectedTask) return null;
+
+    const startDate = formatDateForInput(selectedTask.startDate);
+    const endDate = formatDateForInput(selectedTask.endDate);
+
     return(
-        <div className={styles.main} style={{backgroundColor: backgroundMode}}>
-            <RightPanelHeader taskTitle={selectedTask.title} setIsEditTaskActive={hanldleEditOpen} setIsRightPanelActive={setIsRightPanelActive}/>
-            <h2><b>Id:</b> {selectedTask.id}</h2>
-            <h2 className={styles.description}><b>Description:</b> {selectedTask.description}</h2>
-            <h2><b>Status:</b> <StatusText status={selectedTask.status}/></h2>
-            <h2><b>Start date:</b> {selectedTask.startDate}</h2>
-            <h2><b>End date:</b> {selectedTask.endDate}</h2>
-            <h2><b>Assigned members:</b></h2>
-            <UserIconCollection usersThemes={usersThemes} users={asignedTaskUsers || []} size={30} maxIcons={6}/>
+        <div className={styles.main} style={{backgroundColor: theme}}>
+            <RightPanelHeader taskTitle={selectedTask.title} setIsEditTaskActive={handleEditOpen} setIsRightPanelActive={setIsRightPanelActive}/>
+            <Title text={'id:'}/>
+            {selectedTask.id}
+            <Title text={'Description:'}/>
+            {selectedTask.description}
+            <Title text={'Status:'}/>
+            <StatusText status={selectedTask.status}/>
+            <Title text={'Start date:'}/>
+            {startDate}
+            <Title text={'End date:'}/>
+            {endDate}
+            <Title text={'Assigned members:'}/>
+            <UserIconCollection
+                users={assignedUsers || []}
+                size={30} maxIcons={6}
+            />
         </div>
     )
-});
+};
 
 export default TaskDetails;

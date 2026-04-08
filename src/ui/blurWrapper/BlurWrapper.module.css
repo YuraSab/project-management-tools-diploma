@@ -1,0 +1,28 @@
+.overlay{
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    background-color: rgba(211, 211, 211, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+}
+
+.content{
+    background-color: white;
+    width: 90vw;
+    height: 90vh;
+    overflow: auto;
+    border-radius: 12px;
+    padding: 40px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.x{
+    align-self: end;
+}

@@ -1,0 +1,21 @@
+:root {
+    --bg-main: #f9f9fb;
+    --bg-card: #ffffff;
+    --color-text-main: #1A202C;
+    --color-text-muted: #4A5568;
+    --border-default: 1px solid #E2E8F0;
+
+    --container-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+
+    /* __THEMES START__ */
+    /* Background */
+    --purple-hover: #f5f3ff;
+    /*--purple-hover: orange;*/
+
+    --green-hover: #dcfce7;
+    --blue-hover: #dbeafe;
+    --orange-hover: #ffedd5;
+
+
+    /* __THEMES END__ */
+}

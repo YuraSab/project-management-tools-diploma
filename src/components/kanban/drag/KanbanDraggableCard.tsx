@@ -1,14 +1,15 @@
 import { Draggable } from '@hello-pangea/dnd';
 import { Task } from '../../../types/task';
 import KanbanCard from '../kanbanCard/KanbanCard';
+import {memo} from "react";
 
-type Props = {
+type KanbanDraggableCardProps = {
   task: Task;
   index: number;
   handleOnTaskClick: (task: Task) => void;
 };
 
-export const KanbanDraggableCard = ({ task, index, handleOnTaskClick }: Props) => {
+const KanbanDraggableCard = ({ task, index, handleOnTaskClick }: KanbanDraggableCardProps) => {
   return (
     <Draggable draggableId={task.id.toString()} index={index}>
       {(provided) => (
@@ -24,3 +25,5 @@ export const KanbanDraggableCard = ({ task, index, handleOnTaskClick }: Props) =
     </Draggable>
   );
 };
+
+export default memo(KanbanDraggableCard);

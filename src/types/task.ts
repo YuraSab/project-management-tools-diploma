@@ -1,5 +1,15 @@
+import {UserProfile} from "./user.ts";
+import type {Timestamp} from "firebase/firestore";
+
 export type TaskStatus = "todo" | "in_progress" | "done";
 export type TaskPriority = "low" | "medium" | "high" | "none";
+export interface TaskFilters {
+    users: UserProfile[],
+    start: string,
+    end: string,
+    priority: TaskPriority,
+}
+export type SortOption = "Start date dec" | "Start date inc" | "End date dec" | "End date inc" | "none";
 
 export interface Task {
     id: string,
@@ -8,7 +18,10 @@ export interface Task {
     description: string,
     assignedMembers: string[],
     status: TaskStatus,
-    startDate?: string,
-    endDate?: string,
+    startDate?: Timestamp | Date | null,
+    endDate?: Timestamp | Date | null,
     priority?: TaskPriority,
 }
+
+export const TASK_STATUSES: TaskStatus[] = ["todo", "in_progress", "done"];
+export const TASK_PRIORITIES: TaskPriority[] = ["low", "medium", "high"];

@@ -1,6 +1,6 @@
 import styles from "./FormSelect.module.css";
+import {SortOption} from "../../types/task.ts";
 
-export type SortOption = "Start date dec" | "Start date inc" | "End date dec" | "End date inc" | "none";
 export const sortOptions: SortOption[] = ["Start date dec", "Start date inc", "End date dec", "End date inc", "none"];
 
 interface CustomSelectProps {
