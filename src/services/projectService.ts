@@ -1,5 +1,5 @@
 import {Project} from "../types/project.ts";
-import {collection, doc, getDoc, getDocs, query, updateDoc, deleteDoc, where} from "firebase/firestore";
+import {collection, doc, getDoc, getDocs, query, updateDoc, deleteDoc, where, addDoc} from "firebase/firestore";
 import {db} from "../firebase.ts";
 
 export const getProjects = async (userId: string): Promise<Project[]> => {
@@ -29,6 +29,15 @@ export const getProject = async (projectId: string): Promise<Project | null> => 
         id: projectSnap.id,
         ...projectSnap.data()
     } as Project;
+}
+
+export const createProject = async (data: Omit<Project, 'id'>): Promise<Project> => {
+    const projectsCol = collection(db, 'projects');
+    const projectSnap = await addDoc(projectsCol, data);
+    return {
+        id: projectSnap.id,
+        ...data
+    };
 }
 
 export const updateProject = async (data: Partial<Project> & { id: string }): Promise<void> => {

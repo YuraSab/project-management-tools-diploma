@@ -25,11 +25,13 @@ const CustomForm = ({ children, onSubmit, disabled, className, style, ...rest }:
     return (
         <form
             {...rest}
-            className={formClassName}
             onSubmit={handleSubmit}
-            style={style}
         >
-            <fieldset disabled={disabled}>
+            <fieldset
+                disabled={disabled}
+                className={formClassName}
+                style={style}
+            >
                 {children}
             </fieldset>
         </form>

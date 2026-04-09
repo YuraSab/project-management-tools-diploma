@@ -39,10 +39,21 @@ const ProjectSettings: React.FC = () => {
     const { data: project} = useProject(projectId || '');
     const { data: reservedMembers} = useProjectUsers(profile?.reservedMembers || []);
     const { data: projectMembers} = useProjectUsers(project?.assignedMembers || []);
+    const editProjectMutation = useProjectUpdate();
+    const deleteProjectMutation = useProjectDelete();
+
     const isAddMembersActive = useProjectControlStore((state) => state.isAddMembersActive);
     const setIsAddMembersActive = useProjectControlStore((state) => state.setIsAddMembersActive);
     const [formData, setFormData] = useState<FormData>(INITIAL_PROJECT);
-    const [localAssignedMembersIds, setLocalAssignedMembersIds] = useState<string[]>([]);
+    const [localAssignedMembersMap, setLocalAssignedMembersMap] = useState<Map<string, UserProfile>>(new Map());
+
+    const totalMembersMap: Map<string, UserProfile> = useMemo(() => (
+        new Map([...(projectMembers || []), ...(reservedMembers || [])]
+            .map(m=> [m.uid, m]))
+    ), [projectMembers, reservedMembers]);
+
+    const localAssignedMembersIds: string[] = useMemo(() => ([...localAssignedMembersMap.keys()]), [localAssignedMembersMap]);
+    const localAssignedMembers: UserProfile[] = useMemo(() => ([...localAssignedMembersMap.values()]), [localAssignedMembersMap]);
 
     useEffect(() => {
         if (project) {
@@ -58,35 +69,20 @@ const ProjectSettings: React.FC = () => {
 
     useEffect(() => {
         if (projectMembers)
-            setLocalAssignedMembersIds(projectMembers.map(m => m.uid));
+            setLocalAssignedMembersMap( new Map(projectMembers.map(m => [m.uid, m])) );
     }, [projectMembers]);
-
-    const editProjectMutation = useProjectUpdate();
-    const deleteProjectMutation = useProjectDelete();
 
     const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = event.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     }, []);
 
-    const handleAssignUserClick = useCallback((memberId: string) => {
-        setLocalAssignedMembersIds((prev) => {
-            return prev.includes(memberId)
-                ? prev.filter(m => m !== memberId)
-                : [...prev, memberId];
+    const handleAssignMember = useCallback((member: UserProfile) => {
+        setLocalAssignedMembersMap((prev) => {
+            const newPrev = new Map(prev);
+            return newPrev.delete(member.uid) ? newPrev : newPrev.set(member.uid, member);
         });
     }, []);
-
-    const totalMembersMap: Map<string, UserProfile> = useMemo(() => (
-        new Map([...(projectMembers || []), ...(reservedMembers || [])]
-            .map(m=> [m.uid, m]))
-    ), [projectMembers, reservedMembers]);
-
-    const assignedMembers: UserProfile[]  = useMemo(() => (
-        localAssignedMembersIds
-            .map(id => totalMembersMap.get(id))
-            .filter<UserProfile>(isDefined)
-    ), [localAssignedMembersIds, totalMembersMap]);
 
     const handleUpdateProject = async () => {
         if (!project) return;
@@ -122,7 +118,7 @@ const ProjectSettings: React.FC = () => {
             <FormSelect<ProjectStatus> name={"status"} value={formData.status} onChange={handleChange} options={[ProjectStatus.Planned, ProjectStatus.InProgress, ProjectStatus.Completed]}/>
             <Title text={'Members:'}/>
             <AssignMembers
-                assignedMembers={assignedMembers}
+                assignedMembers={localAssignedMembers}
                 setAddMembersActive={setIsAddMembersActive}
                 maxIcons={2} iconSize={28}
             />
@@ -135,7 +131,7 @@ const ProjectSettings: React.FC = () => {
                 <AddMember
                     membersMap={totalMembersMap}
                     selectedMembersIds={localAssignedMembersIds}
-                    filterMemberAction={handleAssignUserClick}
+                    filterMemberAction={handleAssignMember}
                     exitAction={() => setIsAddMembersActive(false)}
                 />
             }

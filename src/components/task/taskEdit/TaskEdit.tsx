@@ -49,29 +49,16 @@ const TaskEdit = () => {
     const [localAssignedMembersMap, setLocalAssignedMembersMap] = useState<Map<string, UserProfile>>(new Map());
     const [addMembersActive, setAddMembersActive] = useState<boolean>(false);
 
-    const projectMembersMap: Map<string, UserProfile> = useMemo(() => new Map(
-        projectMembers
-            ? projectMembers.map(m => [m.uid, m])
-            : []
-    ), [projectMembers]);
+    const projectMembersMap = useMemo(() => new Map([...(projectMembers || []).map(m => [m.uid, m])]), [projectMembers]);
+    const localAssignedMembersIds = useMemo(() => [...localAssignedMembersMap.keys()], [localAssignedMembersMap]);
+    const localAssignedMembers = useMemo(() => [...localAssignedMembersMap.values()], [localAssignedMembersMap]);
 
-    const localAssignedMembers = useMemo(() => (
-        [...localAssignedMembersMap.values()]
-    ), [localAssignedMembersMap]);
-
-    const handleAssignUser = useCallback((memberId: string) => {
+    const handleAssignMember = useCallback((member: UserProfile) => {
         setLocalAssignedMembersMap((prev) => {
-            const newMap = new Map(prev);
-            if (newMap.has(memberId))
-                newMap.delete(memberId)
-            else {
-                const newMember = projectMembersMap.get(memberId);
-                if (newMember)
-                    newMap.set(memberId, newMember);
-            }
-            return newMap;
-        });
-    }, [projectMembersMap]);
+            const newPrev = new Map(prev);
+            return newPrev.delete(member.uid) ? newPrev : newPrev.set(member.uid, member);
+        })
+    }, []);
 
     const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = event.target;
@@ -79,10 +66,8 @@ const TaskEdit = () => {
     }, []);
 
     const handleUpdate = useCallback(() => {
-        if (!selectedTask?.id)
-            return;
-        if (!formData.title.trim() || !formData.description.trim())
-            return alert("Please fill all the required fields!");
+        if (!selectedTask?.id) return;
+        if (!formData.title.trim() || !formData.description.trim()) return alert("Please fill all the required fields!");
         updateTask({
             ...formData,
             id: selectedTask.id,
@@ -109,7 +94,7 @@ const TaskEdit = () => {
         } // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedTask?.id, taskAssignedMembers]);
 
-    return(
+    return (
         <CustomForm onSubmit={handleUpdate} style={{margin: 15, height: "calc(100vh - 130px)"}} disabled={isPendingUpdate || isPendingDelete}>
             <RightPanelHeader taskTitle={selectedTask?.title || ""} setIsEditTaskActive={setIsEditTaskActive} setIsRightPanelActive={setIsRightPanelActive}/>
             <div className={styles.rightPanelChildEdit}>
@@ -139,8 +124,8 @@ const TaskEdit = () => {
             { addMembersActive &&
                 <AddMember
                     membersMap={projectMembersMap}
-                    selectedMembersIds={[...localAssignedMembersMap.keys()]}
-                    filterMemberAction={handleAssignUser}
+                    selectedMembersIds={localAssignedMembersIds}
+                    filterMemberAction={handleAssignMember}
                     exitAction={() => setAddMembersActive(false)}
                 />
             }

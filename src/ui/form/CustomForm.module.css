@@ -17,19 +17,12 @@
     min-width: 0; /* Важливо для флекс-контейнерів */
 }
 
-/*.customForm label {*/
-/*    display: flex;*/
-/*    flex-direction: column;*/
-/*    font-weight: 500;*/
-/*}*/
-
 .light{
     background-color: white;
 }
 .light label{
     color: #1f2937;
 }
-
 .dark{
     background-color: black;
 }

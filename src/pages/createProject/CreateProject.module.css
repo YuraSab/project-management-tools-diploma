@@ -1,0 +1,12 @@
+.main{
+    max-width: 80%;
+    min-width: 800px;
+    padding: 40px 80px;
+}
+
+.buttonBlock{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+}
