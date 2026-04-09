@@ -31,8 +31,8 @@ const RouteLayout = () => (
             <Route path="/personalisation" element={<Personalisation/>}/>
         </Route>
         <Route element={<ProtectedRoute allowedRoles={ALLOWED_ROLES.NON_MEMBERS}/>}>
-            <Route path="/create" element={<Create/>}/>
-            <Route path="/create/project" element={<CreateProject/>}/>
+            {/*<Route path="/create" element={<Create/>}/>*/}
+            <Route path="/projects/create" element={<CreateProject/>}/>
         </Route>
         <Route element={<ProtectedRoute allowedRoles={ALLOWED_ROLES.ONLY_ADMINS}/>}>
             <Route path="/create/user" element={<CreateUser/>}/>

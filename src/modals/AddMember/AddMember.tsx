@@ -7,7 +7,8 @@ import {UserProfile} from "../../types/user";
 interface AddMemberProps {
     membersMap: Map<string, UserProfile>,
     selectedMembersIds: string[],
-    filterMemberAction: (memberId: string) => void,
+    // filterMemberAction: (memberId: string) => void,
+    filterMemberAction: (member: UserProfile) => void,
     exitAction: () => void,
 }
 const AddMember: React.FC<AddMemberProps> = ({ membersMap, selectedMembersIds, filterMemberAction, exitAction }) => {
@@ -31,7 +32,7 @@ const AddMember: React.FC<AddMemberProps> = ({ membersMap, selectedMembersIds, f
                                 <CustomUserIcon title={m.displayName[0]} backgroundColor={m.iconColor} />
                                 <h3>{m.displayName}</h3>
                             </div>
-                            <div onClick={() => filterMemberAction(m.uid)}>
+                            <div onClick={() => filterMemberAction(m)}>
                                 <SquarePlus
                                     size={30}
                                     color={selectedMembersIds.includes(m.uid) ? "green" : 'black'}

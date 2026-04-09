@@ -20,9 +20,13 @@ export const getUser = async (userId: string): Promise<UserProfile | null> => {
     const userSnap = await getDoc(userRef);
     // Що буде правильнішим, повертати null, чи кидати помилку:
     //     if (!userSnap.exists()) throw new Error("User not found");
-    return userSnap.exists()
-        ? (userSnap.data() as UserProfile)
-        : null;
+    // return userSnap.exists()
+    //     ? (userSnap.data() as UserProfile)
+    //     : null;
+    return {
+        uid: userSnap.id,
+        ...userSnap.data()
+    } as UserProfile;
 };
 
 export const getUsersByIds = async (usersIds: string[]): Promise<UserProfile[]> => {
