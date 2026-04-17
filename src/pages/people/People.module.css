@@ -15,3 +15,14 @@ ul{
     align-items: center;
     border-bottom: 1px gray solid;
 }
+
+.userIconContainer {
+    width: 80px;
+}
+
+.buttonsContainer {
+    display: flex;
+    gap: 24px;
+    width: 80px;
+    justify-content: end;
+}

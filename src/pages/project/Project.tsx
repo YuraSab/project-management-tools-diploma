@@ -57,7 +57,7 @@ const Project = () => {
             {isRightPanelActive && !isLoadingProject && (isAddTaskActive || selectedTask !== null) && (
                 <RightPanelProject/>
             )}
-            <FAB><Plus onClick={handleAddTaskOpen} size={36} color={theme}/></FAB>
+            <FAB style={{ right: isRightPanelActive ? 376 : 36 }}><Plus onClick={handleAddTaskOpen} size={36} color={theme}/></FAB>
         </div>
     );
 }

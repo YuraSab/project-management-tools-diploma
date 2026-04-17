@@ -21,7 +21,6 @@ const Projects = () => {
     const { data: projects, isPending, isError } = useUserProjects(user?.uid ?? "");
     const theme = useProfileStore((state) => state.profile.theme);
 
-
     if (isPending) return <ProjectsSkeleton/>;
 
     return (

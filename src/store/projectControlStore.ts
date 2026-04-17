@@ -102,6 +102,8 @@ export const useProjectControlStore = create<ProjectControlState>((set, get) => 
         set({ 
             selectedTask: null,
             isAddMembersActive: false,
+            isRightPanelActive: false,
+            isLeftPanelActive: false,
             statusFilter: [] ,
             usersFilter: [],
             startDateFilter: "",

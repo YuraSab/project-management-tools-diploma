@@ -13,7 +13,7 @@ const CustomNavLink = ({ className = "", customStyles = {}, ...navLinkProps }: C
     const linkColorStyle = ({isActive}: {isActive: boolean}) => ({
         color: isActive 
             ? profile.highlightColor
-            : profile.theme === Theme.Black ? Theme.Black : Theme.White,
+            : profile.theme === Theme.Black ? Theme.White : Theme.Black,
         ...customStyles,
     });
 

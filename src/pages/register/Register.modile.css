@@ -1,0 +1,12 @@
+.caption {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.link {
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}

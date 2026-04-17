@@ -3,7 +3,6 @@ import Login from '../../pages/login/Login';
 import Register from '../../pages/register/Register';
 import People from '../../pages/people/People';
 import Projects from '../../pages/projects/Projects';
-import Create from '../../pages/create/Create';
 import ProtectedRoute from '../../hooks/route/ProtectedRoute.tsx';
 import Project from '../../pages/project/Project';
 import CreateProject from '../../pages/createProject/CreateProject';
@@ -29,10 +28,10 @@ const RouteLayout = () => (
             <Route path="/projects/:projectId" element={<Project/>}/>
             <Route path="/people" element={<People/>}/>
             <Route path="/personalisation" element={<Personalisation/>}/>
+            <Route path="/projects/create" element={<CreateProject/>}/>
         </Route>
         <Route element={<ProtectedRoute allowedRoles={ALLOWED_ROLES.NON_MEMBERS}/>}>
-            {/*<Route path="/create" element={<Create/>}/>*/}
-            <Route path="/projects/create" element={<CreateProject/>}/>
+        {/* todo - resolve, doesn`t member able to create projects */}
         </Route>
         <Route element={<ProtectedRoute allowedRoles={ALLOWED_ROLES.ONLY_ADMINS}/>}>
             <Route path="/create/user" element={<CreateUser/>}/>

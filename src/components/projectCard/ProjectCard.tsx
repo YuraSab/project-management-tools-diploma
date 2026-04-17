@@ -30,12 +30,13 @@ const ProjectCard = React.memo(({project}: ProjectCardProps) => {
     const highlightColor = useProfileStore((state) => state.profile.highlightColor)
 
     const handleSelect = useCallback(() => {
-        if (project.id !== currentSelectedProjectId) clearFiltersAndSorts();
+        if (project.id !== currentSelectedProjectId)
+            clearFiltersAndSorts();
         setSelectedProject(project);
     }, [project, currentSelectedProjectId, setSelectedProject, clearFiltersAndSorts])
 
     return (
-        <NavLink to={`/projects/${project.id}`} onClick={handleSelect}>
+        <NavLink to={`/projects/${project.id}`} onClick={() => handleSelect()}>
             <div className={clsx(styles.element, {
                 [THEME_CLASS_MAP[highlightColor]]: highlightColor,
             })}>

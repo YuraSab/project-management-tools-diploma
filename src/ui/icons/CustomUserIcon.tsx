@@ -12,7 +12,7 @@ interface UserIconProps {
     onClick?: React.Dispatch<React.SetStateAction<boolean>>,
 }
 
-const CustomUserIcon: React.FC<UserIconProps> = ({ title, backgroundColor, total, size=36, fontSize = 18, onClick }) => {
+const CustomUserIcon: React.FC<UserIconProps> = ({ title = '', backgroundColor, total, size=36, fontSize = 18, onClick }) => {
     // const highlightMode = useUserThemeStore((state) => state.highlightMode);
     const highlightColor = useProfileStore((state) => state.profile.highlightColor)
     return(
