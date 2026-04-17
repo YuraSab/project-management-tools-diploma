@@ -1,6 +1,7 @@
 import React from "react";
 import styles from "./FormButtonSubmit.module.css";
 import {useProfileStore} from "../../store/profileStore.ts";
+import {HighlightColor} from "../../types/user.ts";
 
 interface FormButtonSubmitProps {
     text: string,
@@ -8,12 +9,12 @@ interface FormButtonSubmitProps {
 }
 
 const FormButtonSubmit = ({ text, customStyles }: FormButtonSubmitProps) => {
-    const highlightColor = useProfileStore((state) => state.profile.highlightColor);
+    const profile = useProfileStore((state) => state.profile);
     return <button 
         type="submit" 
         className={styles.customSubmitButton} 
         style={{
-            backgroundColor: highlightColor,
+            backgroundColor: profile?.highlightColor ?? HighlightColor.Purple,
             ...customStyles
         }}
     >

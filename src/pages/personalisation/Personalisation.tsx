@@ -9,7 +9,7 @@ import Title from "../../ui/title/Title.tsx";
 const Personalisation = () => {
     const { uid, theme, iconColor, highlightColor } = useProfileStore((state) => state.profile);
     const editProfile = useProfileStore((state) => state.editProfile);
-    const { mutate: updateProfile } = useUpdateUser(uid);
+    const { mutate: updateProfile } = useUpdateUser();
 
     const handleUpdateTheme = () => {
         if ( !uid ) return;

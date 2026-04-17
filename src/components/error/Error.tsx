@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {HTMLAttributes} from 'react';
 import {Ban, GlobeOff, LucideProps, SearchAlert, ServerCrash} from 'lucide-react';
 import styles from './Error.module.css';
 import {useProfileStore} from "../../store/profileStore.ts";
@@ -29,17 +29,26 @@ const ERROR_OPTIONS: Record<ErrorType, ErrorConfig> = {
     }
 };
 
-interface ErrorProps {
+interface ErrorProps extends HTMLAttributes<HTMLDivElement>{
     type: ErrorType,
     text?: string,
 }
 
-const Error = ({ type, text }: ErrorProps) => {
+const Error = ({ type, text, style, ...rest }: ErrorProps) => {
     const highlightColor = useProfileStore((state) => state.profile.highlightColor)
     const { Icon, defaultText } = ERROR_OPTIONS[type];
+    const combinedStyles: React.CSSProperties = {
+        color: highlightColor,
+        ...style
+    };
+
     return (
-        <div className={styles.block}>
-            <h2 style={{ color: highlightColor }}>{text ? text : defaultText}</h2>
+        <div
+            className={styles.block}
+            style={combinedStyles}
+            {...rest}
+        >
+            <h2>{text ? text : defaultText}</h2>
             <Icon size={54} color={highlightColor}/>
         </div>
     );

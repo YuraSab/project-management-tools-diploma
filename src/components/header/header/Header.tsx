@@ -3,14 +3,12 @@ import styles from "./Header.module.css";
 import CustomUserIcon from "../../../ui/icons/CustomUserIcon";
 import CustomNavLink from "../../../ui/link/CustomNavLink";
 import {useProfileStore} from "../../../store/profileStore.ts";
-import {Role} from "../../../types/user.ts";
 import {useHeaderStore} from "../../../store/headerStore.ts";
 
 const Header = () => {
     const profile = useProfileStore((state) => state.profile);
     const isHeaderModalOpened = useHeaderStore((state) => state.isHeaderModalOpened);
     const setIsHeaderModalToggle = useHeaderStore((state) => state.setIsHeaderModalToggle);
-
     return (
         <header
             className={styles.main}
@@ -19,9 +17,6 @@ const Header = () => {
             <nav>
                 <CustomNavLink to="/projects">Projects</CustomNavLink>
                 <CustomNavLink to="/people">People</CustomNavLink>
-                {(profile.role !== Role.Admin || profile.role === Role.Manager) && (
-                    <CustomNavLink to="/create">Create</CustomNavLink>
-                )}
             </nav>
             <CustomUserIcon
                 title={profile ? profile.displayName : "User"}
